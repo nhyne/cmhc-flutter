@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:english_words/english_words.dart';
 import 'dart:io';
 import 'dart:convert';
+import 'dart:async';
 
 void main() => runApp(new MyApp());
 
@@ -23,11 +24,11 @@ class RandomWords extends StatefulWidget {
 class RandomWordsState extends State<RandomWords> {
   @override
 
-  var _protocols = '';
+  Map _protocols;
   final _suggestions = <WordPair> [];
   final _biggerFont = const TextStyle(fontSize: 18.0);
 
-  _getProtocols() async {
+  Future<List> _getProtocols() async {
     var httpClient = new HttpClient();
     httpClient.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
 
@@ -37,14 +38,15 @@ class RandomWordsState extends State<RandomWords> {
     var response = await request.close();
     var responseBody = await response.transform(utf8.decoder).join();
     Map data = json.decode(responseBody);
-    print(data['data']);
-    setState(() {
-      _protocols = data['data'];
-    });
+    // print(data['data']);
+    return data['data'];
   }
 
-  Widget _buildSuggestions() {
+  Widget createListView(BuildContext context, AsyncSnapshot snapshot) {
+    List values = snapshot.data;
+    print(values);
     return new ListView.builder(
+      itemCount: values.length,
       padding: const EdgeInsets.all(16.0),
       // The itemBuilder callback is called once per suggested word pairing,
       // and places each suggestion into a ListTile row.
@@ -52,43 +54,48 @@ class RandomWordsState extends State<RandomWords> {
       // For odd rows, the function adds a Divider widget to visually
       // separate the entries. Note that the divider may be difficult
       // to see on smaller devices.
-      itemBuilder: (context, i) {
+      itemBuilder: (BuildContext context, int index) {
         // Add a one-pixel-high divider widget before each row in theListView.
-        if (i.isOdd) return new Divider();
-
-        // The syntax "i ~/ 2" divides i by 2 and returns an integer result.
-        // For example: 1, 2, 3, 4, 5 becomes 0, 1, 1, 2, 2.
-        // This calculates the actual number of word pairings in the ListView,
-        // minus the divider widgets.
-        final index = i ~/ 2;
-        // If you've reached the end of the available word pairings...
-        if (index >= _suggestions.length) {
-          // ...then generate 10 more and add them to the suggestions list.
-          _suggestions.addAll(generateWordPairs().take(10));
-        }
-        return _buildRow(_suggestions[index]);
+        if (index.isOdd) return new Divider();
+        if (values == null) return new ListTile(title: 'Getting data...');
+        print(values[index]);
+        print(values.length);
+        return _buildRow(values[index]);
       }
     );
   }
 
-  Widget _buildRow(WordPair data) {
+  Widget _buildRow(Map data) {
     return new ListTile(
       title: new Text(
-        data.asPascalCase,
+        data['attributes']['title'],
         style: _biggerFont,
       ),
     );
   }
 
   Widget build(BuildContext context) {
-    print(_protocols);
-    _getProtocols();
-    print(_protocols);
+
+    var futureBuilder = new FutureBuilder(
+      future: _getProtocols(),
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.none:
+          case ConnectionState.waiting:
+            return new Text('loading...');
+          default:
+            if (snapshot.hasError)
+              return new Text('Error: ${snapshot.error}');
+            else
+              return createListView(context, snapshot);
+        }
+      }
+    );
     return new Scaffold (
       appBar: new AppBar(
-        title: new Text('Startup Name Generator'),
+        title: new Text('Home Page'),
       ),
-      body: _buildSuggestions(),
+      body: futureBuilder,
     );
   }
 }
