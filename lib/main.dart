@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:english_words/english_words.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'dart:async';
@@ -11,21 +10,20 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return new MaterialApp(
       title: 'Startup Name Generator',
-      home: new RandomWords(),
+      home: new CmhcProtocolsList(),
     );
   }
 }
 
-class RandomWords extends StatefulWidget {
+class CmhcProtocolsList extends StatefulWidget {
   @override
-  createState() => new RandomWordsState();
+  createState() => new ProtocolsState();
 }
 
-class RandomWordsState extends State<RandomWords> {
+class ProtocolsState extends State<CmhcProtocolsList> {
   @override
 
   Map _protocols;
-  final _suggestions = <WordPair> [];
   final _biggerFont = const TextStyle(fontSize: 18.0);
 
   Future<List> _getProtocols() async {
@@ -44,22 +42,11 @@ class RandomWordsState extends State<RandomWords> {
 
   Widget createListView(BuildContext context, AsyncSnapshot snapshot) {
     List values = snapshot.data;
-    print(values);
     return new ListView.builder(
       itemCount: values.length,
       padding: const EdgeInsets.all(16.0),
-      // The itemBuilder callback is called once per suggested word pairing,
-      // and places each suggestion into a ListTile row.
-      // For even rows, the function adds a ListTile row for the word pairing.
-      // For odd rows, the function adds a Divider widget to visually
-      // separate the entries. Note that the divider may be difficult
-      // to see on smaller devices.
       itemBuilder: (BuildContext context, int index) {
         // Add a one-pixel-high divider widget before each row in theListView.
-        if (index.isOdd) return new Divider();
-        if (values == null) return new ListTile(title: 'Getting data...');
-        print(values[index]);
-        print(values.length);
         return _buildRow(values[index]);
       }
     );
@@ -82,7 +69,9 @@ class RandomWordsState extends State<RandomWords> {
         switch (snapshot.connectionState) {
           case ConnectionState.none:
           case ConnectionState.waiting:
-            return new Text('loading...');
+            return new ListTile(
+              title: new Text('loading...', style: _biggerFont)
+            );
           default:
             if (snapshot.hasError)
               return new Text('Error: ${snapshot.error}');
