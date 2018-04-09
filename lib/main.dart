@@ -82,7 +82,7 @@ class ProtocolsState extends State<CmhcProtocolsList> {
     );
     return new Scaffold (
       appBar: new AppBar(
-        title: new Text('Home Page'),
+        title: new Text('Protocols'),
       ),
       body: futureBuilder,
     );
