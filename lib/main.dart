@@ -26,19 +26,6 @@ class ProtocolsState extends State<CmhcProtocolsList> {
   Map _protocols;
   final _biggerFont = const TextStyle(fontSize: 18.0);
 
-  Future<List> _getSteps(String protocolId) async {
-    var httpClient = new HttpClient();
-    httpClient.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
-
-    var url = "https://cmhc-protocols.org/api/protocols/" + protocolId + "/steps";
-
-    var request = await httpClient.getUrl(Uri.parse(url));
-    var response = await request.close();
-    var responseBody = await response.transform(utf8.decoder).join();
-    Map data = json.decode(responseBody);
-    return data['data'];
-  }
-
   Future<List> _getProtocols() async {
     var httpClient = new HttpClient();
     httpClient.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
@@ -53,24 +40,6 @@ class ProtocolsState extends State<CmhcProtocolsList> {
   }
 
   void _selectTile(Map data) {
-    var futureBuilder = new FutureBuilder(
-      future: _getSteps(data['id']),
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.none:
-          case ConnectionState.waiting:
-            return new ListTile(
-              title: new Text('loading...', style: _biggerFont)
-            );
-          default:
-            if (snapshot.hasError)
-              return new Text('Error: ${snapshot.error}');
-            else
-              return createStepListView(context, snapshot);
-        }
-      }
-    );
-
     Navigator.of(context).push(
       new MaterialPageRoute(
         builder: (context) {
@@ -78,7 +47,7 @@ class ProtocolsState extends State<CmhcProtocolsList> {
             appBar: new AppBar(
               title: new Text('Steps'),  
             ),
-            body: futureBuilder,
+            body: new Image.network('https://storage.googleapis.com/cmhc-protocols-production/DpwTsWs79559Sm221bh3rniR'),
           );
         }
       ),
