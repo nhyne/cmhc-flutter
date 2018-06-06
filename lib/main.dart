@@ -28,7 +28,7 @@ class ProtocolsState extends State<CmhcProtocolsList> {
 
   Future<List> _getProtocols() async {
     var httpClient = new HttpClient();
-    httpClient.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+    // httpClient.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
 
     var url = 'https://cmhc-protocols.org/api/protocols';
 
@@ -40,6 +40,7 @@ class ProtocolsState extends State<CmhcProtocolsList> {
   }
 
   void _selectTile(Map data) {
+    print(data);
     Navigator.of(context).push(
       new MaterialPageRoute(
         builder: (context) {
@@ -47,7 +48,7 @@ class ProtocolsState extends State<CmhcProtocolsList> {
             appBar: new AppBar(
               title: new Text('Steps'),  
             ),
-            body: new Image.network('https://storage.googleapis.com/cmhc-protocols-production/DpwTsWs79559Sm221bh3rniR'),
+            body: new Image.network(data['attributes']['images-url'][0]),
           );
         }
       ),
