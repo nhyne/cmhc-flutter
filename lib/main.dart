@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'dart:async';
+import 'package:photo_view/photo_view.dart';
 
 void main() => runApp(new MyApp());
 
@@ -23,12 +24,10 @@ class CmhcProtocolsList extends StatefulWidget {
 class ProtocolsState extends State<CmhcProtocolsList> {
   @override
 
-  Map _protocols;
   final _biggerFont = const TextStyle(fontSize: 18.0);
 
   Future<List> _getProtocols() async {
     var httpClient = new HttpClient();
-    // httpClient.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
 
     var url = 'https://cmhc-protocols.org/api/protocols';
 
@@ -41,6 +40,8 @@ class ProtocolsState extends State<CmhcProtocolsList> {
 
   void _selectTile(Map data) {
     print(data);
+    var imageURL = data['attributes']['images-url'][0];
+
     Navigator.of(context).push(
       new MaterialPageRoute(
         builder: (context) {
@@ -48,10 +49,19 @@ class ProtocolsState extends State<CmhcProtocolsList> {
             appBar: new AppBar(
               title: new Text('Steps'),  
             ),
-            body: new Image.network(data['attributes']['images-url'][0]),
+            body: createPhotoView(imageURL)
           );
         }
       ),
+    );
+  }
+
+  Widget createPhotoView(String imageURL) {
+    return new PhotoView(
+      // imageProvider: Image.network(data['attributes']['images-url'][0]),
+      imageProvider: NetworkImage(imageURL),
+      minScale: PhotoViewComputedScale.contained * 0.8,
+      maxScale: 4.0,
     );
   }
 
@@ -98,6 +108,15 @@ class ProtocolsState extends State<CmhcProtocolsList> {
     );
   }
 
+  Widget _buildErrorTile(Object error) {
+    return new ListTile(
+      title: new Text(
+        'Error: ${error}',
+        style: _biggerFont,
+      ),
+    );
+  }
+
   Widget build(BuildContext context) {
 
     var futureBuilder = new FutureBuilder(
@@ -111,7 +130,7 @@ class ProtocolsState extends State<CmhcProtocolsList> {
             );
           default:
             if (snapshot.hasError)
-              return new Text('Error: ${snapshot.error}');
+              return _buildErrorTile(snapshot.error);
             else
               return createProtocolListView(context, snapshot);
         }
