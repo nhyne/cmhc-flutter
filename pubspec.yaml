@@ -4,7 +4,8 @@ description: A new Flutter project.
 dependencies:
   flutter:
     sdk: flutter
-  photo_view: ^0.0.7
+  photo_view: "^0.0.7"
+  flutter_launcher_icons: "^0.7.0"
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -14,6 +15,10 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+flutter_icons:
+  image_path: "icons/icon.png"
+  android: true
+  ios: true
 
 # For information on the generic Dart part of this file, see the
 # following page: https://www.dartlang.org/tools/pub/pubspec

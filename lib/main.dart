@@ -29,7 +29,7 @@ class ProtocolsState extends State<CmhcProtocolsList> {
   Future<List> _getProtocols() async {
     var httpClient = new HttpClient();
 
-    var url = 'https://cmhc-protocols.org/api/protocols';
+    var url = 'http://cmhc-protocols.org/api/protocols';
 
     var request = await httpClient.getUrl(Uri.parse(url));
     var response = await request.close();
